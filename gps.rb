@@ -36,7 +36,7 @@ end
 
 
 flight = JSON.parse (RestClient.post 'http://airkopter.herokuapp.com/flights', :accept => :json)
-flight_id = 28
+flight_id = flight["id"]
 
 
 #dustThread = Thread.new do 
