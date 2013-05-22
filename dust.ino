@@ -11,7 +11,7 @@
  JST Pin 4 (Yellow wire) => Arduino Digital Pin 8
  */
 
-int pin = 8;
+int pin = 9;
 unsigned long duration;
 unsigned long starttime;
 unsigned long sampletime_us = 30000000;//sampe 30s ;
@@ -21,15 +21,27 @@ unsigned long pulses = 0;
 float ratio = 0;
 float concentration = 0;
 
+#include "dht11.h"
+dht11 DHT11;
+#define DHT11PIN 2
+
 void setup() {
   Serial.begin(115200);
   pinMode(pin,INPUT);
+  digitalWrite(pin, HIGH);
+
   starttime = micros();//get the current time;
 }
 
 void loop() {
   duration = pulseIn(pin, LOW, sampletime_us);
-  if(duration == 0) duration = sampletime_us;
+  if(duration == 0) {
+    duration = 0;
+//    Serial.println("timeout");
+  } else {
+//    Serial.println("pulse");
+  }
+    
 
   pulses += 1;
   lowpulseoccupancy = lowpulseoccupancy+duration;
@@ -40,6 +52,9 @@ void loop() {
     ratio = lowpulseoccupancy/(float)(stoptime-starttime)*100.0;  // Integer percentage 0=>100
     concentration = 1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62; // using spec sheet curve
 
+   int chk = DHT11.read(DHT11PIN);
+
+    Serial.print("[");    
     Serial.print(lowpulseoccupancy);    
     Serial.print(",");
     Serial.print((stoptime-starttime));
@@ -48,11 +63,15 @@ void loop() {
     Serial.print(",");
     Serial.print(concentration);
     Serial.print(",");
-    Serial.println(pulses);
+    Serial.print(pulses),
+    Serial.print(",");    
+    Serial.print((float)DHT11.humidity, 2);
+    Serial.print(",");
+    Serial.print((float)DHT11.temperature, 2);
+    Serial.println("]");    
 
     lowpulseoccupancy = 0;
     starttime = micros();
     pulses = 0;
   }
 }
-
