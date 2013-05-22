@@ -25,11 +25,10 @@ gpsThread = Thread.new do
       gps[:fix]     = (matches[2] == "A")
       lat = coordregex.match matches[3]
       lon = coordregex.match matches[5]
-      p lat
 
-      gps[:lat]     = (lat[1].to_i + lat[2].to_i/60.0)  * (if matches[4] == "N" then 1 else -1 end)
-      gps[:lon]     = (lon[1].to_i + lon[2].to_i/60.0) * (if matches[6] == "E" then 1 else -1 end)
-      p gps
+      gps[:lat]     = (lat[1].to_i + lat[2].to_f/60.0)  * (if matches[4] == "N" then 1 else -1 end)
+      gps[:lon]     = (lon[1].to_i + lon[2].to_f/60.0) * (if matches[6] == "E" then 1 else -1 end)
+      #p gps
     end
   end
 end
@@ -45,10 +44,10 @@ flight_id = flight["id"]
   File.open("dust.log", "a") do |f|
     while(sentence = sp.gets) do
       puts sentence
-      regexp = /^(\d+),(\d+),(\d+(?:\.\d+)?),(\d+(?:\.\d+)?),(\d+),(\d+(?:\.\d+)?),(\d+(?:\.\d+)?)/
+      regexp = /^\[(\d+),(\d+),(\d+(?:\.\d+)?),(\d+(?:\.\d+)?),(\d+),(\d+(?:\.\d+)?),(\d+(?:\.\d+)?)\]/
       matches = regexp.match sentence
       unless matches
-        puts "DUPA: [#{sentence}]"
+        puts "Couldn't parse: [#{sentence}]"
       else
         result = {timestamp: DateTime.now, ratio: matches[3].to_f, concentration: matches[4].to_f, gps: gps, sensordata: sentence, humidity: matches[6].to_f, temperature: matches[7].to_f}
         p result
